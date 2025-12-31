@@ -89,6 +89,12 @@ const app = {
 
     // Game Display
     updateGameDisplay() {
+        // Safety check
+        if (!this.players || this.players.length === 0) {
+            console.error('No players available');
+            return;
+        }
+
         // Update dealer info
         const dealerInfo = document.getElementById('dealer-info');
         dealerInfo.textContent = `es verteilt ${this.players[this.currentDealer].name}`;

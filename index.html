@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rauf und Runter - Punktezähler</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Landing Page -->
+        <div id="landing-page" class="page active">
+            <div class="container">
+                <h1>Rauf und Runter</h1>
+                <p class="subtitle">Kartenspiel Punktezähler</p>
+                <button class="btn btn-primary" onclick="app.showPlayerSetup()">Punktezähler</button>
+            </div>
+        </div>
+
+        <!-- Player Setup Page -->
+        <div id="player-setup-page" class="page">
+            <div class="container">
+                <h2>Spieler hinzufügen</h2>
+                <div id="player-inputs">
+                    <div class="player-input-group">
+                        <input type="text" placeholder="Spieler 1" class="player-name-input">
+                        <button class="btn-remove" onclick="app.removePlayerInput(this)">×</button>
+                    </div>
+                    <div class="player-input-group">
+                        <input type="text" placeholder="Spieler 2" class="player-name-input">
+                        <button class="btn-remove" onclick="app.removePlayerInput(this)">×</button>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" onclick="app.addPlayerInput()">+ Spieler hinzufügen</button>
+                
+                <div class="option-group">
+                    <label class="checkbox-label" for="stiche-aufgehen">
+                        <input type="checkbox" id="stiche-aufgehen" checked>
+                        <span>Stiche dürfen aufgehen</span>
+                    </label>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="app.showLanding()">Zurück</button>
+                    <button class="btn btn-primary" onclick="app.startGame()">Spiel starten</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Page -->
+        <div id="game-page" class="page">
+            <div class="container">
+                <div class="dealer-info" id="dealer-info">
+                    es verteilt Spieler X
+                </div>
+                
+                <div class="game-controls">
+                    <button class="btn btn-secondary" onclick="app.showPlayerSetup()">Zurück</button>
+                    <button class="btn btn-primary" onclick="app.nextRound()">Nächste Runde</button>
+                </div>
+                
+                <div class="players-list" id="players-list">
+                    <!-- Player rows will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

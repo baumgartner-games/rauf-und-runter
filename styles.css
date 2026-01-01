@@ -186,11 +186,130 @@ body {
     padding: 8px;
 }
 
-.game-layout {
+.game-header {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    min-height: calc(100vh - 220px);
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.header-actions {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.btn-overview {
+    min-width: 160px;
+}
+
+.round-view,
+.overview-view {
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.round-view.active,
+.overview-view.active {
+    display: flex;
+}
+
+.round-scroll {
+    background-color: var(--surface);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    max-height: calc(100vh - 260px);
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.round-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.section-title {
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+}
+
+.player-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.player-card-header {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.value-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.value-button {
+    min-width: 36px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background-color: var(--surface);
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.value-button:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.value-button.active {
+    background-color: #dbeafe;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: var(--shadow);
+}
+
+.round-summary {
+    padding: 12px;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    background-color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.summary-row {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.round-controls {
+    display: flex;
+    gap: 12px;
+}
+
+.round-controls .btn {
+    flex: 1;
+    min-width: auto;
 }
 
 .table-container {
@@ -326,65 +445,6 @@ body {
     background-color: #f8fafc;
 }
 
-.selection-bar {
-    background-color: var(--surface);
-    border-radius: 10px;
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-}
-
-.selection-info {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    flex: 1;
-}
-
-.selection-controls {
-    display: flex;
-    gap: 8px;
-}
-
-.game-controls {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 1.5rem;
-}
-
-.game-controls .btn {
-    flex: 1;
-    min-width: auto;
-}
-
-.btn-step {
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-    background-color: var(--surface);
-    color: var(--text-primary);
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.btn-step:hover:not(:disabled) {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-}
-
-.btn-step:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 /* Responsive */
 @media (max-width: 640px) {
     #landing-page h1 {
@@ -407,8 +467,7 @@ body {
         grid-template-columns: 1fr;
     }
 
-    .selection-bar {
-        flex-direction: column;
-        align-items: flex-start;
+    .value-buttons {
+        gap: 6px;
     }
 }

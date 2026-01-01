@@ -50,25 +50,26 @@
         <!-- Game Page -->
         <div id="game-page" class="page">
             <div class="container">
-                <div class="dealer-info" id="dealer-info">
-                    es verteilt Spieler X
+                <div class="game-header">
+                    <div class="dealer-info" id="dealer-info"></div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary btn-overview" onclick="app.toggleOverview()">Übersicht</button>
+                    </div>
                 </div>
-                
-                <div class="game-controls">
-                    <button class="btn btn-secondary" onclick="app.showPlayerSetup()">Zurück</button>
-                    <button class="btn btn-primary" onclick="app.nextRound()">Nächste Runde</button>
+
+                <div class="round-view" id="round-view">
+                    <div class="round-scroll" id="round-scroll">
+                        <!-- Round details will be inserted here -->
+                    </div>
+                    <div class="round-controls">
+                        <button class="btn btn-secondary" onclick="app.previousRound()">Zurück</button>
+                        <button class="btn btn-primary" onclick="app.nextRound()">Nächste Runde</button>
+                    </div>
                 </div>
-                
-                <div class="game-layout">
+
+                <div class="overview-view" id="overview-view">
                     <div class="table-container" id="players-list">
                         <!-- Score table will be inserted here -->
-                    </div>
-                    <div class="selection-bar">
-                        <div class="selection-info" id="selection-info">Tippe auf Will oder Hat, um Punkte zu ändern.</div>
-                        <div class="selection-controls">
-                            <button class="btn-step" id="selection-minus" type="button" onclick="app.adjustSelected(-1)" disabled>−</button>
-                            <button class="btn-step" id="selection-plus" type="button" onclick="app.adjustSelected(1)" disabled>+</button>
-                        </div>
                     </div>
                 </div>
             </div>

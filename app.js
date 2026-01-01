@@ -6,6 +6,8 @@ const app = {
     currentDealer: 0,
     currentRound: 1,
     roundIndex: 0,
+    rounds: [],
+    selectedCell: null,
     roundSequence: [
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
         9, 8, 7, 6, 5, 4, 3, 2, 1
@@ -82,13 +84,25 @@ const app = {
         this.sticheAufgehen = document.getElementById('stiche-aufgehen').checked;
         this.players = playerNames.map(name => ({
             name: name,
-            predicted: 0,
-            actual: 0
+            total: 0
         }));
         
         this.currentDealer = 0;
         this.roundIndex = 0;
         this.currentRound = this.roundSequence[this.roundIndex];
+        this.rounds = this.roundSequence.map(number => ({
+            number,
+            players: this.players.map(() => ({
+                will: 0,
+                hat: 0,
+                points: 0
+            }))
+        }));
+        this.selectedCell = {
+            roundIndex: this.roundIndex,
+            playerIndex: 0,
+            field: 'will'
+        };
         
         this.showGame();
     },
@@ -105,61 +119,133 @@ const app = {
         const dealerInfo = document.getElementById('dealer-info');
         dealerInfo.textContent = `Runde ${this.currentRound} – es verteilt ${this.players[this.currentDealer].name}`;
 
+        this.updateTotals();
+
         // Update players list
         const playersList = document.getElementById('players-list');
         playersList.innerHTML = '';
 
-        this.players.forEach((player, index) => {
-            const row = document.createElement('div');
-            row.className = 'player-row';
-            row.innerHTML = `
+        const table = document.createElement('div');
+        table.className = 'score-table';
+        table.style.setProperty('--player-count', this.players.length);
+
+        const headerRow = document.createElement('div');
+        headerRow.className = 'score-row score-header';
+        headerRow.innerHTML = `<div class="score-cell round-header">Runde</div>`;
+        this.players.forEach(player => {
+            const headerCell = document.createElement('div');
+            headerCell.className = 'score-cell player-header';
+            headerCell.innerHTML = `
                 <div class="player-name">${player.name}</div>
-                <div class="player-stats">
-                    <div class="stat-group">
-                        <label class="stat-label">Soll</label>
-                        <div class="stat-controls">
-                            <button class="btn-step" type="button" onclick="app.adjustPlayerScore(${index}, 'predicted', -1)">−</button>
-                            <input type="tel"
-                                   class="stat-input"
-                                   inputmode="numeric"
-                                   pattern="[0-9]*"
-                                   value="${player.predicted}"
-                                   onchange="app.updatePlayerPredicted(${index}, this.value)">
-                            <button class="btn-step" type="button" onclick="app.adjustPlayerScore(${index}, 'predicted', 1)">+</button>
-                        </div>
-                    </div>
-                    <div class="stat-group">
-                        <label class="stat-label">Ist</label>
-                        <div class="stat-controls">
-                            <button class="btn-step" type="button" onclick="app.adjustPlayerScore(${index}, 'actual', -1)">−</button>
-                            <input type="tel"
-                                   class="stat-input"
-                                   inputmode="numeric"
-                                   pattern="[0-9]*"
-                                   value="${player.actual}"
-                                   onchange="app.updatePlayerActual(${index}, this.value)">
-                            <button class="btn-step" type="button" onclick="app.adjustPlayerScore(${index}, 'actual', 1)">+</button>
-                        </div>
-                    </div>
-                </div>
+                <div class="player-total">Gesamt ${player.total}</div>
             `;
-            playersList.appendChild(row);
+            headerRow.appendChild(headerCell);
+        });
+        table.appendChild(headerRow);
+
+        this.rounds.forEach((round, roundIndex) => {
+            const row = document.createElement('div');
+            row.className = 'score-row';
+            if (roundIndex === this.roundIndex) {
+                row.classList.add('current-round');
+            }
+
+            const roundCell = document.createElement('div');
+            roundCell.className = 'score-cell round-cell';
+            roundCell.textContent = `R${round.number}`;
+            row.appendChild(roundCell);
+
+            round.players.forEach((playerRound, playerIndex) => {
+                const cell = document.createElement('div');
+                cell.className = 'score-cell player-cell';
+                const isWillSelected = this.isSelected(roundIndex, playerIndex, 'will');
+                const isHatSelected = this.isSelected(roundIndex, playerIndex, 'hat');
+                cell.innerHTML = `
+                    <div class="cell-split">
+                        <button class="cell-part cell-button ${isWillSelected ? 'selected' : ''}"
+                                type="button"
+                                onclick="app.selectCell(${roundIndex}, ${playerIndex}, 'will')">
+                            <span class="cell-label">Will</span>
+                            <span class="cell-value">${playerRound.will}</span>
+                        </button>
+                        <button class="cell-part cell-button ${isHatSelected ? 'selected' : ''}"
+                                type="button"
+                                onclick="app.selectCell(${roundIndex}, ${playerIndex}, 'hat')">
+                            <span class="cell-label">Hat</span>
+                            <span class="cell-value">${playerRound.hat}</span>
+                        </button>
+                        <div class="cell-part cell-points">
+                            <span class="cell-label">Punkte</span>
+                            <span class="cell-value">${playerRound.points}</span>
+                        </div>
+                    </div>
+                `;
+                row.appendChild(cell);
+            });
+
+            table.appendChild(row);
+        });
+
+        playersList.appendChild(table);
+        this.updateSelectionBar();
+    },
+
+    isSelected(roundIndex, playerIndex, field) {
+        return this.selectedCell
+            && this.selectedCell.roundIndex === roundIndex
+            && this.selectedCell.playerIndex === playerIndex
+            && this.selectedCell.field === field;
+    },
+
+    selectCell(roundIndex, playerIndex, field) {
+        this.selectedCell = { roundIndex, playerIndex, field };
+        this.updateGameDisplay();
+    },
+
+    adjustSelected(delta) {
+        if (!this.selectedCell) {
+            return;
+        }
+        const { roundIndex, playerIndex, field } = this.selectedCell;
+        const roundPlayer = this.rounds[roundIndex].players[playerIndex];
+        const nextValue = Math.max(0, roundPlayer[field] + delta);
+        roundPlayer[field] = nextValue;
+        this.updateCellPoints(roundIndex, playerIndex);
+        this.updateTotals();
+        this.updateGameDisplay();
+    },
+
+    updateCellPoints(roundIndex, playerIndex) {
+        const roundPlayer = this.rounds[roundIndex].players[playerIndex];
+        roundPlayer.points = roundPlayer.hat + (roundPlayer.hat === roundPlayer.will ? 10 : 0);
+    },
+
+    updateTotals() {
+        this.players.forEach((player, playerIndex) => {
+            const total = this.rounds.reduce((sum, round) => sum + round.players[playerIndex].points, 0);
+            player.total = total;
         });
     },
 
-    updatePlayerPredicted(index, value) {
-        this.players[index].predicted = parseInt(value) || 0;
-    },
+    updateSelectionBar() {
+        const info = document.getElementById('selection-info');
+        const minusButton = document.getElementById('selection-minus');
+        const plusButton = document.getElementById('selection-plus');
 
-    updatePlayerActual(index, value) {
-        this.players[index].actual = parseInt(value) || 0;
-    },
+        if (!this.selectedCell) {
+            info.textContent = 'Tippe auf Will oder Hat, um Punkte zu ändern.';
+            minusButton.disabled = true;
+            plusButton.disabled = true;
+            return;
+        }
 
-    adjustPlayerScore(index, field, delta) {
-        const currentValue = this.players[index][field] || 0;
-        const nextValue = Math.max(0, currentValue + delta);
-        this.players[index][field] = nextValue;
-        this.updateGameDisplay();
+        const { roundIndex, playerIndex, field } = this.selectedCell;
+        const playerName = this.players[playerIndex].name;
+        const roundNumber = this.rounds[roundIndex].number;
+        const fieldLabel = field === 'will' ? 'Will' : 'Hat';
+        info.textContent = `Auswahl: Runde ${roundNumber} · ${playerName} · ${fieldLabel}`;
+        minusButton.disabled = false;
+        plusButton.disabled = false;
     },
 
     nextRound() {
@@ -167,13 +253,13 @@ const app = {
         this.currentDealer = (this.currentDealer + 1) % this.players.length;
         this.roundIndex = (this.roundIndex + 1) % this.roundSequence.length;
         this.currentRound = this.roundSequence[this.roundIndex];
-        
-        // Reset current round values
-        this.players.forEach(player => {
-            player.predicted = 0;
-            player.actual = 0;
-        });
-        
+
+        this.selectedCell = {
+            roundIndex: this.roundIndex,
+            playerIndex: 0,
+            field: 'will'
+        };
+
         this.updateGameDisplay();
     }
 };

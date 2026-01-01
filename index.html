@@ -59,8 +59,17 @@
                     <button class="btn btn-primary" onclick="app.nextRound()">Nächste Runde</button>
                 </div>
                 
-                <div class="players-list" id="players-list">
-                    <!-- Player rows will be inserted here -->
+                <div class="game-layout">
+                    <div class="table-container" id="players-list">
+                        <!-- Score table will be inserted here -->
+                    </div>
+                    <div class="selection-bar">
+                        <div class="selection-info" id="selection-info">Tippe auf Will oder Hat, um Punkte zu ändern.</div>
+                        <div class="selection-controls">
+                            <button class="btn-step" id="selection-minus" type="button" onclick="app.adjustSelected(-1)" disabled>−</button>
+                            <button class="btn-step" id="selection-plus" type="button" onclick="app.adjustSelected(1)" disabled>+</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

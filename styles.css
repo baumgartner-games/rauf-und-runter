@@ -207,14 +207,16 @@ body {
 }
 
 .round-view,
-.overview-view {
+.overview-view,
+.results-view {
     display: none;
     flex-direction: column;
     gap: 16px;
 }
 
 .round-view.active,
-.overview-view.active {
+.overview-view.active,
+.results-view.active {
     display: flex;
 }
 
@@ -444,6 +446,54 @@ body {
 
 .cell-points {
     background-color: #f8fafc;
+}
+
+.results-panel {
+    background-color: var(--surface);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.results-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.results-rank {
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.results-name {
+    font-weight: 600;
+    flex: 1;
+    margin-left: 12px;
+}
+
+.results-points {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.results-actions {
+    display: flex;
+    justify-content: center;
 }
 
 /* Responsive */

@@ -8,6 +8,7 @@ const app = {
     roundIndex: 0,
     rounds: [],
     showOverview: false,
+    showResults: false,
     roundSequence: [
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
         9, 8, 7, 6, 5, 4, 3, 2, 1
@@ -99,6 +100,7 @@ const app = {
             }))
         }));
         this.showOverview = false;
+        this.showResults = false;
         
         this.showGame();
     },
@@ -126,13 +128,22 @@ const app = {
 
         const roundView = document.getElementById('round-view');
         const overviewView = document.getElementById('overview-view');
-        roundView.classList.toggle('active', !this.showOverview);
+        const resultsView = document.getElementById('results-view');
+        roundView.classList.toggle('active', !this.showOverview && !this.showResults);
         overviewView.classList.toggle('active', this.showOverview);
+        resultsView.classList.toggle('active', this.showResults);
 
         if (this.showOverview) {
             this.renderOverviewTable();
+        } else if (this.showResults) {
+            this.renderResultsView();
         } else {
             this.renderRoundView();
+        }
+
+        const overviewToggle = document.getElementById('overview-toggle');
+        if (overviewToggle) {
+            overviewToggle.textContent = this.showOverview ? 'Zur Punkteingabe' : 'Übersicht';
         }
     },
     
@@ -199,6 +210,11 @@ const app = {
         roundScroll.appendChild(willSection);
         roundScroll.appendChild(hatSection);
         roundScroll.appendChild(summarySection);
+
+        const nextButton = document.getElementById('next-round-btn');
+        if (nextButton) {
+            nextButton.textContent = this.isLastRound() ? 'Ergebnis' : 'Nächste Runde';
+        }
     },
 
     renderValueButtons(roundIndex, playerIndex, field, currentValue) {
@@ -287,6 +303,33 @@ const app = {
         playersList.appendChild(table);
     },
 
+    renderResultsView() {
+        const resultsList = document.getElementById('results-list');
+        if (!resultsList) {
+            return;
+        }
+        resultsList.innerHTML = '';
+
+        const ranking = this.players
+            .map((player, index) => ({
+                index,
+                name: player.name,
+                total: player.total
+            }))
+            .sort((a, b) => b.total - a.total);
+
+        ranking.forEach((player, index) => {
+            const row = document.createElement('div');
+            row.className = 'results-row';
+            row.innerHTML = `
+                <span class="results-rank">#${index + 1}</span>
+                <span class="results-name">${player.name}</span>
+                <span class="results-points">${player.total} Punkte</span>
+            `;
+            resultsList.appendChild(row);
+        });
+    },
+
     updateCellPoints(roundIndex, playerIndex) {
         const roundPlayer = this.rounds[roundIndex].players[playerIndex];
         if (roundPlayer.hat === null || roundPlayer.will === null) {
@@ -316,7 +359,14 @@ const app = {
     },
 
     toggleOverview() {
+        this.showResults = false;
         this.showOverview = !this.showOverview;
+        this.updateGameDisplay();
+    },
+
+    showOverviewScreen() {
+        this.showResults = false;
+        this.showOverview = true;
         this.updateGameDisplay();
     },
 
@@ -339,20 +389,37 @@ const app = {
     },
 
     nextRound() {
+        if (this.showResults) {
+            return;
+        }
+
         if (this.roundIndex < this.roundSequence.length - 1) {
             this.roundIndex += 1;
+            this.currentRound = this.roundSequence[this.roundIndex];
+            this.updateGameDisplay();
+            this.scrollRoundToTop();
+            return;
+        }
+
+        this.showResults = true;
+        this.showOverview = false;
+        this.updateGameDisplay();
+    },
+
+    previousRound() {
+        if (this.showResults) {
+            this.showResults = false;
+        }
+        if (this.roundIndex > 0) {
+            this.roundIndex -= 1;
         }
         this.currentRound = this.roundSequence[this.roundIndex];
         this.updateGameDisplay();
         this.scrollRoundToTop();
     },
 
-    previousRound() {
-        if (this.roundIndex > 0) {
-            this.roundIndex -= 1;
-        }
-        this.currentRound = this.roundSequence[this.roundIndex];
-        this.updateGameDisplay();
+    isLastRound() {
+        return this.roundIndex === this.roundSequence.length - 1;
     }
 };
 

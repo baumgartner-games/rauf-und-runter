@@ -5,6 +5,11 @@ const app = {
     sticheAufgehen: true,
     currentDealer: 0,
     currentRound: 1,
+    roundIndex: 0,
+    roundSequence: [
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+        9, 8, 7, 6, 5, 4, 3, 2, 1
+    ],
 
     // Page Navigation
     showLanding() {
@@ -82,7 +87,8 @@ const app = {
         }));
         
         this.currentDealer = 0;
-        this.currentRound = 1;
+        this.roundIndex = 0;
+        this.currentRound = this.roundSequence[this.roundIndex];
         
         this.showGame();
     },
@@ -97,7 +103,7 @@ const app = {
 
         // Update dealer info
         const dealerInfo = document.getElementById('dealer-info');
-        dealerInfo.textContent = `es verteilt ${this.players[this.currentDealer].name}`;
+        dealerInfo.textContent = `Runde ${this.currentRound} – es verteilt ${this.players[this.currentDealer].name}`;
 
         // Update players list
         const playersList = document.getElementById('players-list');
@@ -142,7 +148,8 @@ const app = {
     nextRound() {
         // Move to next dealer
         this.currentDealer = (this.currentDealer + 1) % this.players.length;
-        this.currentRound++;
+        this.roundIndex = (this.roundIndex + 1) % this.roundSequence.length;
+        this.currentRound = this.roundSequence[this.roundIndex];
         
         // Reset current round values
         this.players.forEach(player => {

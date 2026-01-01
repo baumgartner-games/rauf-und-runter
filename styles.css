@@ -294,7 +294,7 @@ body {
 }
 
 .round-summary {
-    background-color: #f8fafc;
+    background-color: var(--surface);
     gap: 6px;
 }
 

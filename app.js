@@ -135,6 +135,13 @@ const app = {
             this.renderRoundView();
         }
     },
+    
+    scrollRoundToTop() {
+        const roundScroll = document.getElementById('round-scroll');
+        if (roundScroll) {
+            roundScroll.scrollTop = 0;
+        }
+    },
 
     renderRoundView() {
         const roundScroll = document.getElementById('round-scroll');
@@ -337,6 +344,7 @@ const app = {
         }
         this.currentRound = this.roundSequence[this.roundIndex];
         this.updateGameDisplay();
+        this.scrollRoundToTop();
     },
 
     previousRound() {

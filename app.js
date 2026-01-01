@@ -144,7 +144,7 @@ const app = {
         const order = this.getAnnouncementOrder();
 
         const willSection = document.createElement('div');
-        willSection.className = 'round-section';
+        willSection.className = 'round-panel';
         willSection.innerHTML = '<h3 class="section-title">Will</h3>';
         order.forEach(playerIndex => {
             const player = this.players[playerIndex];
@@ -161,7 +161,7 @@ const app = {
         });
 
         const hatSection = document.createElement('div');
-        hatSection.className = 'round-section';
+        hatSection.className = 'round-panel';
         hatSection.innerHTML = '<h3 class="section-title">Hat</h3>';
         order.forEach(playerIndex => {
             const player = this.players[playerIndex];
@@ -178,14 +178,14 @@ const app = {
         });
 
         const summarySection = document.createElement('div');
-        summarySection.className = 'round-summary';
+        summarySection.className = 'round-panel round-summary';
         summarySection.innerHTML = '<h3 class="section-title">Kurze Übersicht</h3>';
         order.forEach(playerIndex => {
             const player = this.players[playerIndex];
             const playerRound = round.players[playerIndex];
             const row = document.createElement('div');
             row.className = 'summary-row';
-            row.textContent = `${player.name} · Will ${playerRound.will} · Hat ${playerRound.hat}`;
+            row.textContent = `${player.name} · Will ${playerRound.will} · Hat ${playerRound.hat} —> +${playerRound.points}`;
             summarySection.appendChild(row);
         });
 

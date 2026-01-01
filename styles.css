@@ -217,10 +217,8 @@ body {
 }
 
 .round-scroll {
-    background-color: var(--surface);
+    background-color: var(--background);
     border-radius: 12px;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
     max-height: calc(100vh - 260px);
     overflow-y: auto;
     padding: 16px;
@@ -229,7 +227,12 @@ body {
     gap: 20px;
 }
 
-.round-section {
+.round-panel {
+    background-color: var(--surface);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -288,12 +291,7 @@ body {
 }
 
 .round-summary {
-    padding: 12px;
-    border: 1px dashed var(--border);
-    border-radius: 10px;
     background-color: #f8fafc;
-    display: flex;
-    flex-direction: column;
     gap: 6px;
 }
 

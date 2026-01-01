@@ -93,8 +93,8 @@ const app = {
         this.rounds = this.roundSequence.map(number => ({
             number,
             players: this.players.map(() => ({
-                will: 0,
-                hat: 0,
+                will: null,
+                hat: null,
                 points: 0
             }))
         }));
@@ -185,7 +185,7 @@ const app = {
             const playerRound = round.players[playerIndex];
             const row = document.createElement('div');
             row.className = 'summary-row';
-            row.textContent = `${player.name} · Will ${playerRound.will} · Hat ${playerRound.hat} —> +${playerRound.points}`;
+            row.textContent = `${player.name} · Will ${this.formatValue(playerRound.will)} · Hat ${this.formatValue(playerRound.hat)} —> +${playerRound.points}`;
             summarySection.appendChild(row);
         });
 
@@ -207,6 +207,14 @@ const app = {
                 </button>
             `);
         }
+        const isUndefinedActive = currentValue === null;
+        buttons.push(`
+            <button class="value-button ${isUndefinedActive ? 'active' : ''}"
+                    type="button"
+                    onclick="app.setPlayerValue(${roundIndex}, ${playerIndex}, '${field}', null)">
+                ?
+            </button>
+        `);
         return buttons.join('');
     },
 
@@ -251,11 +259,11 @@ const app = {
                     <div class="cell-split">
                         <div class="cell-part">
                             <span class="cell-label">Will</span>
-                            <span class="cell-value">${playerRound.will}</span>
+                            <span class="cell-value">${this.formatValue(playerRound.will)}</span>
                         </div>
                         <div class="cell-part">
                             <span class="cell-label">Hat</span>
-                            <span class="cell-value">${playerRound.hat}</span>
+                            <span class="cell-value">${this.formatValue(playerRound.hat)}</span>
                         </div>
                         <div class="cell-part cell-points">
                             <span class="cell-label">Punkte</span>
@@ -274,6 +282,10 @@ const app = {
 
     updateCellPoints(roundIndex, playerIndex) {
         const roundPlayer = this.rounds[roundIndex].players[playerIndex];
+        if (roundPlayer.hat === null || roundPlayer.will === null) {
+            roundPlayer.points = 0;
+            return;
+        }
         roundPlayer.points = roundPlayer.hat + (roundPlayer.hat === roundPlayer.will ? 10 : 0);
     },
 
@@ -290,6 +302,10 @@ const app = {
         this.updateCellPoints(roundIndex, playerIndex);
         this.updateTotals();
         this.updateGameDisplay();
+    },
+
+    formatValue(value) {
+        return value === null ? '?' : value;
     },
 
     toggleOverview() {

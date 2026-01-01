@@ -117,19 +117,29 @@ const app = {
                 <div class="player-stats">
                     <div class="stat-group">
                         <label class="stat-label">Soll</label>
-                        <input type="number" 
-                               class="stat-input" 
-                               min="0" 
-                               value="${player.predicted}"
-                               onchange="app.updatePlayerPredicted(${index}, this.value)">
+                        <div class="stat-controls">
+                            <button class="btn-step" type="button" onclick="app.adjustPlayerScore(${index}, 'predicted', -1)">−</button>
+                            <input type="tel"
+                                   class="stat-input"
+                                   inputmode="numeric"
+                                   pattern="[0-9]*"
+                                   value="${player.predicted}"
+                                   onchange="app.updatePlayerPredicted(${index}, this.value)">
+                            <button class="btn-step" type="button" onclick="app.adjustPlayerScore(${index}, 'predicted', 1)">+</button>
+                        </div>
                     </div>
                     <div class="stat-group">
                         <label class="stat-label">Ist</label>
-                        <input type="number" 
-                               class="stat-input" 
-                               min="0" 
-                               value="${player.actual}"
-                               onchange="app.updatePlayerActual(${index}, this.value)">
+                        <div class="stat-controls">
+                            <button class="btn-step" type="button" onclick="app.adjustPlayerScore(${index}, 'actual', -1)">−</button>
+                            <input type="tel"
+                                   class="stat-input"
+                                   inputmode="numeric"
+                                   pattern="[0-9]*"
+                                   value="${player.actual}"
+                                   onchange="app.updatePlayerActual(${index}, this.value)">
+                            <button class="btn-step" type="button" onclick="app.adjustPlayerScore(${index}, 'actual', 1)">+</button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -143,6 +153,13 @@ const app = {
 
     updatePlayerActual(index, value) {
         this.players[index].actual = parseInt(value) || 0;
+    },
+
+    adjustPlayerScore(index, field, delta) {
+        const currentValue = this.players[index][field] || 0;
+        const nextValue = Math.max(0, currentValue + delta);
+        this.players[index][field] = nextValue;
+        this.updateGameDisplay();
     },
 
     nextRound() {

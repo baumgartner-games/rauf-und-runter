@@ -7,7 +7,7 @@ const app = {
     currentRound: 1,
     roundIndex: 0,
     rounds: [],
-    selectedCell: null,
+    showOverview: false,
     roundSequence: [
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
         9, 8, 7, 6, 5, 4, 3, 2, 1
@@ -98,11 +98,7 @@ const app = {
                 points: 0
             }))
         }));
-        this.selectedCell = {
-            roundIndex: this.roundIndex,
-            playerIndex: 0,
-            field: 'will'
-        };
+        this.showOverview = false;
         
         this.showGame();
     },
@@ -115,13 +111,106 @@ const app = {
             return;
         }
 
-        // Update dealer info
+        const announcerIndex = this.getAnnouncerIndex();
+        const dealerIndex = this.getDealerIndex();
+        const dealerName = this.players[dealerIndex].name;
+        const announcerName = this.players[announcerIndex].name;
+
         const dealerInfo = document.getElementById('dealer-info');
-        dealerInfo.textContent = `Runde ${this.currentRound} – es verteilt ${this.players[this.currentDealer].name}`;
+        dealerInfo.innerHTML = `
+            <div>Runde ${this.currentRound} · Es teilt aus: <strong>${dealerName}</strong></div>
+            <div>Als erstes sagt an: <strong>${announcerName}</strong></div>
+        `;
 
         this.updateTotals();
 
-        // Update players list
+        const roundView = document.getElementById('round-view');
+        const overviewView = document.getElementById('overview-view');
+        roundView.classList.toggle('active', !this.showOverview);
+        overviewView.classList.toggle('active', this.showOverview);
+
+        if (this.showOverview) {
+            this.renderOverviewTable();
+        } else {
+            this.renderRoundView();
+        }
+    },
+
+    renderRoundView() {
+        const roundScroll = document.getElementById('round-scroll');
+        roundScroll.innerHTML = '';
+
+        const round = this.rounds[this.roundIndex];
+        const order = this.getAnnouncementOrder();
+
+        const willSection = document.createElement('div');
+        willSection.className = 'round-section';
+        willSection.innerHTML = '<h3 class="section-title">Will</h3>';
+        order.forEach(playerIndex => {
+            const player = this.players[playerIndex];
+            const playerRound = round.players[playerIndex];
+            const playerCard = document.createElement('div');
+            playerCard.className = 'player-card';
+            playerCard.innerHTML = `
+                <div class="player-card-header">${player.name}</div>
+                <div class="value-buttons">
+                    ${this.renderValueButtons(this.roundIndex, playerIndex, 'will', playerRound.will)}
+                </div>
+            `;
+            willSection.appendChild(playerCard);
+        });
+
+        const hatSection = document.createElement('div');
+        hatSection.className = 'round-section';
+        hatSection.innerHTML = '<h3 class="section-title">Hat</h3>';
+        order.forEach(playerIndex => {
+            const player = this.players[playerIndex];
+            const playerRound = round.players[playerIndex];
+            const playerCard = document.createElement('div');
+            playerCard.className = 'player-card';
+            playerCard.innerHTML = `
+                <div class="player-card-header">${player.name}</div>
+                <div class="value-buttons">
+                    ${this.renderValueButtons(this.roundIndex, playerIndex, 'hat', playerRound.hat)}
+                </div>
+            `;
+            hatSection.appendChild(playerCard);
+        });
+
+        const summarySection = document.createElement('div');
+        summarySection.className = 'round-summary';
+        summarySection.innerHTML = '<h3 class="section-title">Kurze Übersicht</h3>';
+        order.forEach(playerIndex => {
+            const player = this.players[playerIndex];
+            const playerRound = round.players[playerIndex];
+            const row = document.createElement('div');
+            row.className = 'summary-row';
+            row.textContent = `${player.name} · Will ${playerRound.will} · Hat ${playerRound.hat}`;
+            summarySection.appendChild(row);
+        });
+
+        roundScroll.appendChild(willSection);
+        roundScroll.appendChild(hatSection);
+        roundScroll.appendChild(summarySection);
+    },
+
+    renderValueButtons(roundIndex, playerIndex, field, currentValue) {
+        const maxValue = 10;
+        const buttons = [];
+        for (let value = 0; value <= maxValue; value += 1) {
+            const isActive = value === currentValue;
+            buttons.push(`
+                <button class="value-button ${isActive ? 'active' : ''}"
+                        type="button"
+                        onclick="app.setPlayerValue(${roundIndex}, ${playerIndex}, '${field}', ${value})">
+                    ${value}
+                </button>
+            `);
+        }
+        return buttons.join('');
+    },
+
+    renderOverviewTable() {
         const playersList = document.getElementById('players-list');
         playersList.innerHTML = '';
 
@@ -155,25 +244,19 @@ const app = {
             roundCell.textContent = `R${round.number}`;
             row.appendChild(roundCell);
 
-            round.players.forEach((playerRound, playerIndex) => {
+            round.players.forEach(playerRound => {
                 const cell = document.createElement('div');
                 cell.className = 'score-cell player-cell';
-                const isWillSelected = this.isSelected(roundIndex, playerIndex, 'will');
-                const isHatSelected = this.isSelected(roundIndex, playerIndex, 'hat');
                 cell.innerHTML = `
                     <div class="cell-split">
-                        <button class="cell-part cell-button ${isWillSelected ? 'selected' : ''}"
-                                type="button"
-                                onclick="app.selectCell(${roundIndex}, ${playerIndex}, 'will')">
+                        <div class="cell-part">
                             <span class="cell-label">Will</span>
                             <span class="cell-value">${playerRound.will}</span>
-                        </button>
-                        <button class="cell-part cell-button ${isHatSelected ? 'selected' : ''}"
-                                type="button"
-                                onclick="app.selectCell(${roundIndex}, ${playerIndex}, 'hat')">
+                        </div>
+                        <div class="cell-part">
                             <span class="cell-label">Hat</span>
                             <span class="cell-value">${playerRound.hat}</span>
-                        </button>
+                        </div>
                         <div class="cell-part cell-points">
                             <span class="cell-label">Punkte</span>
                             <span class="cell-value">${playerRound.points}</span>
@@ -187,32 +270,6 @@ const app = {
         });
 
         playersList.appendChild(table);
-        this.updateSelectionBar();
-    },
-
-    isSelected(roundIndex, playerIndex, field) {
-        return this.selectedCell
-            && this.selectedCell.roundIndex === roundIndex
-            && this.selectedCell.playerIndex === playerIndex
-            && this.selectedCell.field === field;
-    },
-
-    selectCell(roundIndex, playerIndex, field) {
-        this.selectedCell = { roundIndex, playerIndex, field };
-        this.updateGameDisplay();
-    },
-
-    adjustSelected(delta) {
-        if (!this.selectedCell) {
-            return;
-        }
-        const { roundIndex, playerIndex, field } = this.selectedCell;
-        const roundPlayer = this.rounds[roundIndex].players[playerIndex];
-        const nextValue = Math.max(0, roundPlayer[field] + delta);
-        roundPlayer[field] = nextValue;
-        this.updateCellPoints(roundIndex, playerIndex);
-        this.updateTotals();
-        this.updateGameDisplay();
     },
 
     updateCellPoints(roundIndex, playerIndex) {
@@ -227,39 +284,50 @@ const app = {
         });
     },
 
-    updateSelectionBar() {
-        const info = document.getElementById('selection-info');
-        const minusButton = document.getElementById('selection-minus');
-        const plusButton = document.getElementById('selection-plus');
+    setPlayerValue(roundIndex, playerIndex, field, value) {
+        const roundPlayer = this.rounds[roundIndex].players[playerIndex];
+        roundPlayer[field] = value;
+        this.updateCellPoints(roundIndex, playerIndex);
+        this.updateTotals();
+        this.updateGameDisplay();
+    },
 
-        if (!this.selectedCell) {
-            info.textContent = 'Tippe auf Will oder Hat, um Punkte zu ändern.';
-            minusButton.disabled = true;
-            plusButton.disabled = true;
-            return;
+    toggleOverview() {
+        this.showOverview = !this.showOverview;
+        this.updateGameDisplay();
+    },
+
+    getAnnouncerIndex() {
+        return this.roundIndex % this.players.length;
+    },
+
+    getDealerIndex() {
+        const announcerIndex = this.getAnnouncerIndex();
+        return (announcerIndex - 1 + this.players.length) % this.players.length;
+    },
+
+    getAnnouncementOrder() {
+        const order = [];
+        const announcerIndex = this.getAnnouncerIndex();
+        for (let offset = 0; offset < this.players.length; offset += 1) {
+            order.push((announcerIndex + offset) % this.players.length);
         }
-
-        const { roundIndex, playerIndex, field } = this.selectedCell;
-        const playerName = this.players[playerIndex].name;
-        const roundNumber = this.rounds[roundIndex].number;
-        const fieldLabel = field === 'will' ? 'Will' : 'Hat';
-        info.textContent = `Auswahl: Runde ${roundNumber} · ${playerName} · ${fieldLabel}`;
-        minusButton.disabled = false;
-        plusButton.disabled = false;
+        return order;
     },
 
     nextRound() {
-        // Move to next dealer
-        this.currentDealer = (this.currentDealer + 1) % this.players.length;
-        this.roundIndex = (this.roundIndex + 1) % this.roundSequence.length;
+        if (this.roundIndex < this.roundSequence.length - 1) {
+            this.roundIndex += 1;
+        }
         this.currentRound = this.roundSequence[this.roundIndex];
+        this.updateGameDisplay();
+    },
 
-        this.selectedCell = {
-            roundIndex: this.roundIndex,
-            playerIndex: 0,
-            field: 'will'
-        };
-
+    previousRound() {
+        if (this.roundIndex > 0) {
+            this.roundIndex -= 1;
+        }
+        this.currentRound = this.roundSequence[this.roundIndex];
         this.updateGameDisplay();
     }
 };
